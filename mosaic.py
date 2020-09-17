@@ -1,5 +1,6 @@
 import sys
 import os
+import random
 from PIL import Image
 from multiprocessing import Process, Queue, cpu_count
 
@@ -62,6 +63,7 @@ class TargetImage:
 
 	def get_data(self):
 		print('Processing main image...')
+		Image.MAX_IMAGE_PIXELS = None
 		img = Image.open(self.image_path)
 		w = img.size[0] * ENLARGEMENT
 		h = img.size[1]	* ENLARGEMENT
@@ -96,19 +98,16 @@ class TileFitter:
 		return diff
 
 	def get_best_fit_tile(self, img_data):
-		best_fit_tile_index = None
 		min_diff = sys.maxsize
-		tile_index = 0
 
-		# go through each tile in turn looking for the best match for the part of the image represented by 'img_data'
-		for tile_data in self.tiles_data:
-			diff = self.__get_tile_diff(img_data, tile_data, min_diff)
-			if diff < min_diff:
-				min_diff = diff
-				best_fit_tile_index = tile_index
-			tile_index += 1
+		def sort_key(x):
+			index, tile_data = x
+			return self.__get_tile_diff(img_data, tile_data, min_diff)
 
-		return best_fit_tile_index
+		en_tiles = sorted(enumerate(self.tiles_data), key=sort_key)
+		indices = [index for index, _tile_data in en_tiles]
+
+		return random.choice(indices[:10])
 
 def fit_tiles(work_queue, result_queue, tiles_data):
 	# this function gets run by the worker processes, one on each CPU core
