@@ -104,8 +104,8 @@ class TileFitter:
 			index, tile_data = x
 			return self.__get_tile_diff(img_data, tile_data, min_diff)
 
-		en_tiles = sorted(enumerate(self.tiles_data), key=sort_key)
-		indices = [index for index, _tile_data in en_tiles]
+		enumerated_tiles = sorted(enumerate(self.tiles_data), key=sort_key)
+		indices = [index for index, _tile_data in enumerated_tiles]
 
 		return random.choice(indices[:10])
 
